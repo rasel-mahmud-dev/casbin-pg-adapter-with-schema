@@ -15,10 +15,14 @@ import {
 export class CasbinRepository {
     private readonly options: PostgresAdapaterOptions;
     private readonly db: Pool | undefined;
+    private readonly tableName: string  = "casbin"
+    private readonly schema: string  = "public"
     private readonly dbClient: <T>(cb: (client: PoolClient) => Promise<T>) => Promise<T>;
 
     public constructor(options: PostgresAdapaterOptions = {}) {
         this.options = options;
+        if(options.schema) this.schema = options.schema
+        if(options.tableName) this.tableName = options.tableName
         if (options.dbClient) {
             this.dbClient = options.dbClient;
         }
@@ -30,7 +34,7 @@ export class CasbinRepository {
 
     public async getAllPolicies(): Promise<CasbinRule[]> {
         return this.dbClient(async (client) => {
-            const { rows } = await client.query("SELECT ptype, rule FROM casbin");
+            const { rows } = await client.query(`SELECT ptype, rule FROM ${this.schema}.${this.tableName}`);
             return rows;
         });
     }
@@ -39,7 +43,7 @@ export class CasbinRepository {
         const [where, values] = buildWhereClause(filter);
 
         return this.dbClient(async (client) => {
-            const { rows } = await client.query("SELECT ptype, rule FROM casbin" + where, values);
+            const { rows } = await client.query(`SELECT ptype, rule FROM ${this.schema}.${this.tableName}` + where, values);
             return rows;
         });
     }
@@ -47,7 +51,7 @@ export class CasbinRepository {
     public async insertPolicy(ptype: string, rule: string[]): Promise<void> {
         return this.dbClient(async (client) => {
             await client.query(
-                "INSERT INTO casbin (ptype, rule) VALUES ($1, $2::jsonb)",
+                `INSERT INTO ${this.schema}.${this.tableName} (ptype, rule) VALUES ($1, $2::jsonb)`,
                 [ptype, JSON.stringify(rule)]
             );
         });
@@ -65,7 +69,7 @@ export class CasbinRepository {
 
         return this.dbClient(async (client) => {
             await client.query(
-                "INSERT INTO casbin (ptype, rule) VALUES " + req.join(", "),
+                `INSERT INTO ${this.schema}.${this.tableName} (ptype, rule) VALUES ` + req.join(", "),
                 values
             );
         });
@@ -73,7 +77,7 @@ export class CasbinRepository {
 
     public async deletePolicies(ptype: string, ruleFilter: CasbinRuleFilter, fieldIndex?: number): Promise<void> {
         const values = [ptype];
-        const req = `DELETE FROM casbin WHERE ptype=$${values.length} AND ` + buildRuleWhereClause(ruleFilter, values, fieldIndex);
+        const req = `DELETE FROM ${this.schema}.${this.tableName} WHERE ptype=$${values.length} AND ` + buildRuleWhereClause(ruleFilter, values, fieldIndex);
 
         return this.dbClient(async (client) => {
             await client.query(req, values);
@@ -82,7 +86,7 @@ export class CasbinRepository {
 
     public async clearPolicies(): Promise<void> {
         return this.dbClient(async (client) => {
-            await client.query("DELETE FROM casbin");
+            await client.query(`DELETE FROM ${this.schema}.${this.tableName}`);
         });
     }
 

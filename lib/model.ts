@@ -19,6 +19,8 @@ export interface PostgresAdapaterOptions {
     // Client Config
     user?: string;
     database?: string;
+    schema?: string;
+    tableName?: string;
     password?: string;
     port?: number;
     host?: string;

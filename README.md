@@ -1,4 +1,4 @@
-# PostgreSQL Casbin Adapter
+# PostgreSQL Casbin Adapter with schema support
 
 [![NPM version](https://img.shields.io/npm/v/casbin-pg-adapter.svg?style=flat-square)](https://npmjs.org/package/casbin-pg-adapter)
 [![NPM download](https://img.shields.io/npm/dm/casbin-pg-adapter.svg?style=flat-square)](https://npmjs.org/package/casbin-pg-adapter)
@@ -12,14 +12,14 @@
 ## Installation
 
 ```bash
-npm install casbin-pg-adapter
+npm install casbin-pg-adapter-with-schema
 ```
 
 ## Simple example
 
 ```typescript
 import { newEnforcer } from "casbin";
-import PostgresAdapter from "casbin-pg-adapter";
+import PostgresAdapter from "casbin-pg-adapter-with-schema";
 
 async function myFunction() {
     // Initialize a Postgres adapter and use it in a Node-Casbin enforcer:
@@ -27,7 +27,9 @@ async function myFunction() {
     // But the adapter will automatically and use the table named "casbin".
     // I think ORM should not automatically create databases.  
     const a = await PostgresAdapter.newAdapter({
-        connectionString: "postgresql://casbin:casbin@localhost:5432/casbin"
+        tableName: "my_table",
+        schema: "my_schema",
+        connectionString: "postgresql://casbin:casbin@localhost:5432/my_table"
     });
 
     const e = await newEnforcer("examples/rbac_model.conf", a);
@@ -51,11 +53,13 @@ async function myFunction() {
 
 ```typescript
 import { newEnforcer } from "casbin";
-import PostgresAdapter from "casbin-pg-adapter";
+import PostgresAdapter from "casbin-pg-adapter-with-schema";
 
 async function myFunction() {
     const a = await PostgresAdapter.newAdapter({
-        connectionString: "postgresql://casbin:casbin@localhost:5432/casbin"
+        tableName: "my_table",
+        schema: "my_schema",
+        connectionString: "postgresql://casbin:casbin@localhost:5432/my_table"
     });
 
     const e = await newEnforcer("examples/rbac_model.conf", a);
@@ -75,11 +79,13 @@ async function myFunction() {
 
 ```typescript
 import { newEnforcer } from "casbin";
-import PostgresAdapter from "casbin-pg-adapter";
+import PostgresAdapter from "casbin-pg-adapter-with-schema";
 
 async function myFunction() {
     const a = await PostgresAdapter.newAdapter({
-        connectionString: "postgresql://casbin:casbin@localhost:5432/casbin"
+        tableName: "my_table",
+        schema: "my_schema",
+        connectionString: "postgresql://casbin:casbin@localhost:5432/my_table"
     });
 
     const e = await newEnforcer("examples/rbac_model.conf", a);
@@ -112,13 +118,17 @@ Additionnally, you can pass the following option to the Adapter:
 ```typescript
 async function startup(): Promise<void> {
     PostgresAdapter.migrate({
-        connectionString: "postgresql://casbin:casbin@localhost:5432/casbin"
+        tableName: "my_table",
+        schema: "my_schema",
+        connectionString: "postgresql://casbin:casbin@localhost:5432/my_table"
     });
 }
 
 async function createEnforcer(): Promise<Enforcer> {
     const a = await PostgresAdapter.newAdapter({
-        connectionString: "postgresql://casbin:casbin@localhost:5432/casbin",
+        tableName: "my_table",
+        schema: "my_schema",
+        connectionString: "postgresql://casbin:casbin@localhost:5432/my_table",
         migrate: false
     });
 
